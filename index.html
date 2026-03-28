@@ -163,6 +163,28 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
 .modal-player{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:13px}
 .modal-player:last-child{border:none}
 select.inp option{background:var(--surf)}
+
+/* BOTTOM NAV */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:rgba(20,20,24,.97);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--border);display:flex;z-index:300;padding:6px 8px calc(6px + env(safe-area-inset-bottom))}
+.bnb{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:6px 2px;cursor:pointer;border:none;background:none;color:var(--muted);font-family:'Inter',sans-serif;font-size:9px;font-weight:500;gap:4px;transition:all .2s;min-width:0;border-radius:10px}
+.bnb svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;transition:stroke .2s}
+.bnb.active{color:var(--gold)}
+.bnb.active svg{stroke:var(--gold)}
+.bnb-add{background:var(--gold)!important;color:#000!important;border-radius:14px;padding:8px 12px;margin:-10px 4px 0;box-shadow:0 4px 20px rgba(240,180,41,.5)}
+.bnb-add svg{stroke:#000!important}
+/* DESKTOP NAV */
+.desk-nav{display:none;gap:4px}
+@media(min-width:640px){.bottom-nav{display:none!important}.desk-nav{display:flex}}
+.dnb{background:transparent;border:none;color:var(--muted);padding:8px 14px;border-radius:8px;cursor:pointer;font-family:'Inter',sans-serif;font-size:13px;font-weight:500;transition:all .15s}
+.dnb:hover{background:var(--card2);color:var(--text)}
+.dnb.active{background:var(--gold);color:#000;font-weight:600}
+/* DROPDOWN SCORE ENTRY */
+.team-select-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:12px}
+.team-select-card h3{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px}
+.team-pills{display:flex;flex-wrap:wrap;gap:8px}
+.team-pill{background:var(--card2);border:1px solid var(--border);color:var(--muted);padding:8px 16px;border-radius:20px;cursor:pointer;font-size:13px;font-weight:500;transition:all .15s;white-space:nowrap}
+.team-pill:active{opacity:.8}
+.team-pill.active{background:var(--gold);border-color:var(--gold);color:#000;font-weight:600}
 </style>
 </head>
 <body>
@@ -183,23 +205,23 @@ select.inp option{background:var(--surf)}
 <!-- BOTTOM NAV (mobile) -->
 <nav class="bottom-nav">
   <button class="bnb active" id="bn-standings" onclick="nav('standings')">
-    <svg viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+    <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
     <span>Standings</span>
   </button>
   <button class="bnb" id="bn-players" onclick="nav('players')">
-    <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
     <span>Players</span>
   </button>
-  <button class="bnb" id="bn-scores" onclick="nav('scores')" style="color:var(--gold)">
-    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
-    <span>Add Scores</span>
+  <button class="bnb bnb-add" id="bn-scores" onclick="nav('scores')">
+    <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    <span>Scores</span>
   </button>
   <button class="bnb" id="bn-history" onclick="nav('history')">
-    <svg viewBox="0 0 24 24"><path d="M3 3h18v18H3z"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
     <span>History</span>
   </button>
   <button class="bnb" id="bn-roster" onclick="nav('roster')">
-    <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+    <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
     <span>Rosters</span>
   </button>
 </nav>
@@ -251,33 +273,41 @@ select.inp option{background:var(--surf)}
       <button class="btn-ghost" onclick="doLogout()">Logout</button>
     </div>
 
-    <div class="sec-hdr" style="margin-top:0">🌐 Auto-fetch from CricAPI</div>
-    <div class="alert a-info">Free key from <strong>cricapi.dev</strong> — save once, reuse every match day.</div>
+    <!-- AUTO FETCH -->
+    <div class="sec-hdr" style="margin-top:0">🌐 Auto-fetch Live Scores</div>
+    <div class="alert a-info" style="font-size:12px">Uses RapidAPI Cricket API Free Data. Save your key once.</div>
     <div class="row" style="margin-bottom:8px">
-      <input type="text" class="inp" id="api-inp" placeholder="Paste CricAPI key" style="flex:1">
+      <input type="text" class="inp" id="api-inp" placeholder="Paste RapidAPI key" style="flex:1">
       <button class="btn btn-out btn-sm" onclick="saveKey()">Save</button>
     </div>
-    <button class="btn" style="margin-bottom:0" onclick="fetchMatches()">Fetch Today's Matches</button>
+    <button class="btn" style="margin-bottom:0" onclick="fetchMatches()">Fetch Today's IPL Matches</button>
     <div id="matches-out" style="margin-top:10px"></div>
 
     <div class="sep"></div>
 
-    <div class="sec-hdr" style="margin-top:0">✏️ Score Entry</div>
+    <!-- MATCH INFO -->
+    <div class="sec-hdr" style="margin-top:0">📅 Match Details</div>
     <div class="row" style="margin-bottom:12px;flex-wrap:wrap;gap:8px">
       <input type="date" class="inp" id="e-date" style="width:155px;flex-shrink:0">
-      <input type="text" class="inp" id="e-label" placeholder="e.g. MI vs CSK" style="flex:1;min-width:140px">
+      <input type="text" class="inp" id="e-label" placeholder="e.g. RCB vs SRH" style="flex:1;min-width:140px">
     </div>
-    <div class="alert a-info" style="font-size:12px">1 run = 1pt · 1 wicket = 20pts · Captain ×2 · Vice Captain ×1.5</div>
-    <div class="tabs" id="e-tabs"></div>
+    <div class="alert a-info" style="font-size:12px">1 run = 1pt &nbsp;·&nbsp; 1 wicket = 20pts &nbsp;·&nbsp; Captain ×2 &nbsp;·&nbsp; Vice Captain ×1.5</div>
+
+    <!-- TEAM SELECTOR -->
+    <div class="sec-hdr">🏏 Select Team to Enter Scores</div>
+    <div class="team-select-card">
+      <div class="team-pills" id="team-pills"></div>
+    </div>
     <div id="e-grid"></div>
     <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
-      <button class="btn btn-out btn-sm" onclick="clearEntry()">Clear</button>
+      <button class="btn btn-out btn-sm" onclick="clearEntry()">Clear All</button>
       <button class="btn btn-sm" style="width:auto" onclick="saveEntry()">💾 Save to Cloud</button>
     </div>
     <div id="save-status" style="margin-top:10px"></div>
 
     <div class="sep"></div>
 
+    <!-- CAPTAINS -->
     <div class="sec-hdr" style="margin-top:0">🎖️ Captain & Vice Captain</div>
     <div class="alert a-info" style="font-size:12px">Captain ×2 points, Vice Captain ×1.5 points. Set once, change anytime.</div>
     <div id="cap-grid"></div>
@@ -319,14 +349,14 @@ const ADMINS = ['ipl2025','friendadmin'];
 // TEAMS & PLAYER DATA
 // ═══════════════════════════════════════════
 const TEAMS = {
-  "Ansh":    ["Abdul Samad","Nicholas Pooran","Kuldeep Yadav","Tristan Stubbs","Kagiso Rabada","Sunil Narine","Ravi Bishnoi","Prabhsimran Singh","Deepak Chahar","Travis Head","Nitish Kumar Reddy","Prasidh Krishna","Ruturaj Gaikwad","Sai Kishore","Vaibhav Arora"],
+  "Ansh":    ["Abdul Samad","Nicholas Pooran","Kuldeep Yadav","Tristan Stubbs","Kagiso Rabada","Sunil Narine","Ravi Bishnoi","Prabhsimran Singh","Deepak Chahar","Travis Head","Nitish Kumar Reddy","Vaibhav Suryavanshi","Ruturaj Gaikwad","Krunal Pandya"],
   "Sidhaant":["KL Rahul","Rinku Singh","Shahrukh Khan","Rashid Khan","Romario Shepherd","Riyan Parag","Rahul Chahar","Mitchell Marsh","Avesh Khan","Ayush Mhatre","Auqib Nabi","Trent Boult"],
   "Jinu":    ["Virat Kohli","Suryakumar Yadav","Abhishek Sharma","Harpreet Brar","Anrich Nortje","Dhruv Jurel","MS Dhoni","Finn Allen","Cameron Green","David Miller","Mohammed Siraj"],
-  "Harshil": ["Nitish Rana","Mohammed Shami","Rishabh Pant","Marco Jansen","Rasikh Dar","Tim Seifert","Jaydev Unadkat","Liam Livingstone","Tim David","Shivam Dube","Quinton de Kock","Donovan Ferreira","Abhishek Porel","Krunal Pandya"],
+  "Harshil": ["Nitish Rana","Mohammed Shami","Prasidh Krishna","Marco Jansen","Rasikh Dar","Tim Seifert","Liam Livingstone","Tim David","Sai Kishore","Rutherford","Donovan Ferreira","Abhishek Porel","Sanju Samson"],
   "Dhyan":   ["Ravindra Jadeja","Khaleel Ahmed","Venkatesh Iyer","Dewald Brevis","Prashant Solanki","Harshal Patel","Jos Buttler","Yashasvi Jaiswal","Varun Chakravarthy","Azmatullah Omarzai","Naman Dhir"],
   "Divi":    ["Shubman Gill","Mangesh Yadav","Devdutt Padikkal","Aiden Markram","Kartik Tyagi","Shashank Singh","Ishan Kishan","Vipraj Nigam","Washington Sundar","Ashutosh Sharma","Ryan Rickleton","Lungi Ngidi"],
   "Aryan":   ["Priyansh Arya","Zeeshan Ansari","Suyash Sharma","Phil Salt","Nehal Wadhera","Jofra Archer","Aryan Badoni","Noor Ahmad","Ben Duckett","Angkrish Raghuvanshi","Mayank Markande"],
-  "Vandit":  ["Aniket Verma","Axar Patel","Shimron Hetmyer","Mukesh Kumar","Sanju Samson","Sai Sudharshan","Glenn Phillips","Arshdeep Singh","Josh Inglis","Mayank Yadav","Blessing Muzarabani"],
+  "Vandit":  ["Aniket Verma","Axar Patel","Shimron Hetmyer","Mukesh Kumar","Rishabh Pant","Sai Sudharshan","Glenn Phillips","Arshdeep Singh","Josh Inglis","Mayank Yadav","Blessing Muzarabani","Shivam Dube"],
   "Dhiraj":  ["Hardik Pandya","Rahul Tewatia","Jamie Overton","Jitesh Sharma","Jasprit Bumrah","Matt Henry","Yuzvendra Chahal","Tilak Varma","Vaibhav Suryavanshi","Ryan Bartlett","Brydon Carse"],
   "Vatty":   ["Rajat Patidar","Bhuvneshwar Kumar","Pat Cummins","Will Jacks","Kartik Sharma","Rohit Sharma","Rachin Ravindra","Shreyas Iyer","Jacob Bethell","Oli Pope","Digvesh Rathi","Heinrich Klassen","Yash Thakur","Shivam Mavi","Shahbaz Ahmed"]
 };
@@ -655,8 +685,9 @@ async function delDay(date){
 // SCORE ENTRY
 // ═══════════════════════════════════════════
 function buildEntryTabs(){
-  document.getElementById('e-tabs').innerHTML = TN.map(t =>
-    `<div class="tab ${t===curTab?'active':''}" onclick="selTab('${t}')">${t}</div>`
+  // Build team pills
+  document.getElementById('team-pills').innerHTML = TN.map(t =>
+    `<div class="team-pill ${t===curTab?'active':''}" onclick="selTab('${t}')">${t}</div>`
   ).join('');
   buildEntryGrid();
   const di = document.getElementById('e-date');
@@ -666,24 +697,34 @@ function selTab(t){ curTab=t; buildEntryTabs(); }
 function buildEntryGrid(){
   const players = TEAMS[curTab];
   const c = DB.caps[curTab]?.c, vc = DB.caps[curTab]?.vc;
+  if(!players||!players.length){
+    document.getElementById('e-grid').innerHTML='<p style="color:var(--muted);padding:1rem">No players in this team.</p>';
+    return;
+  }
   document.getElementById('e-grid').innerHTML = `<div class="entry-card">
-    <div style="display:flex;gap:6px;font-size:10px;color:var(--muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:.8px">
-      <span style="flex:1">Player</span><span style="width:56px;text-align:center">Runs</span><span style="width:56px;text-align:center">Wkts</span><span style="width:42px;text-align:right">Pts</span>
+    <div style="font-size:13px;font-weight:600;margin-bottom:12px;color:var(--text)">${curTab}'s Players</div>
+    <div style="display:grid;grid-template-columns:1fr 60px 60px 46px;gap:6px;font-size:10px;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.8px;padding:0 2px">
+      <span>Player</span><span style="text-align:center">Runs</span><span style="text-align:center">Wkts</span><span style="text-align:right">Pts</span>
     </div>
     ${players.map((p,i) => {
       const ex = pendingScores[p]||{};
       const iC = c&&p===c, iVC = vc&&p===vc;
-      const badge = iC?'<span class="pe-badge pe-c">C</span>':iVC?'<span class="pe-badge pe-vc">VC</span>':'';
+      const badge = iC?'<span class="pe-badge pe-c" style="margin-right:4px">C</span>':iVC?'<span class="pe-badge pe-vc" style="margin-right:4px">VC</span>':'';
       const raw = calcRaw(ex.runs,ex.wkts);
       const pts = iC?raw*2:iVC?Math.round(raw*1.5):raw;
-      const safe = p.replace(/'/g,"\\'");
-      return `<div class="pe-row">
-        <div class="pe-name">${badge} ${p}</div>
+      const safe = p.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+      const hasScore = ex.runs||ex.wkts;
+      return `<div class="pe-row" style="${hasScore?'background:rgba(240,180,41,.06);border-radius:8px;padding:4px 6px;margin:-4px -6px 4px':''}">
+        <div class="pe-name" style="font-size:13px">${badge}${p}</div>
         <input type="number" class="pe-inp" id="r-${i}" placeholder="0" min="0" value="${ex.runs||''}" inputmode="numeric" oninput="upEntry('${safe}',${i})">
         <input type="number" class="pe-inp" id="w-${i}" placeholder="0" min="0" max="10" value="${ex.wkts||''}" inputmode="numeric" oninput="upEntry('${safe}',${i})">
-        <div class="pe-pts" id="pt-${i}">${pts}p</div>
+        <div class="pe-pts" id="pt-${i}" style="${pts>0?'color:var(--gold)':'color:var(--muted)'}">${pts>0?pts+'p':'—'}</div>
       </div>`;
     }).join('')}
+    <div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border);display:flex;justify-content:space-between;font-size:12px;color:var(--muted)">
+      <span>Players with scores: <strong style="color:var(--text)">${Object.keys(pendingScores).filter(p=>TEAMS[curTab].includes(p)).length}</strong></span>
+      <span>Team total today: <strong style="color:var(--gold)">${Object.entries(pendingScores).filter(([p])=>TEAMS[curTab].includes(p)).reduce((s,[p,{runs,wkts}])=>s+calcPts(p,curTab,runs,wkts),0)}pts</strong></span>
+    </div>
   </div>`;
 }
 function upEntry(player,i){
@@ -692,7 +733,12 @@ function upEntry(player,i){
   const t = TN.find(t=>TEAMS[t].includes(player))||curTab;
   const c=DB.caps[t]?.c, vc=DB.caps[t]?.vc;
   const raw=calcRaw(r,w);
-  document.getElementById('pt-'+i).textContent=(c&&player===c?raw*2:vc&&player===vc?Math.round(raw*1.5):raw)+'p';
+  const pts = c&&player===c?raw*2:vc&&player===vc?Math.round(raw*1.5):raw;
+  const el=document.getElementById('pt-'+i);
+  el.textContent=pts>0?pts+'p':'—';
+  el.style.color=pts>0?'var(--gold)':'var(--muted)';
+  // refresh summary
+  buildEntryGrid();
 }
 function clearEntry(){ pendingScores={}; buildEntryGrid(); }
 async function saveEntry(){
@@ -707,48 +753,16 @@ async function saveEntry(){
   DB.history.sort((a,b) => a.date.localeCompare(b.date));
   const ok = await cloudWrite();
   if(ok){
-    ss.innerHTML = '<div class="alert a-ok">✅ Scores saved to cloud! All devices updated.</div>';
+    ss.innerHTML = '<div class="alert a-ok">✅ Scores saved! All devices updated.</div>';
     pendingScores={}; buildEntryGrid(); renderStandings(); renderPS(); renderHistory();
     setTimeout(()=>ss.innerHTML='',4000);
   } else {
-    ss.innerHTML = '<div class="alert a-err">❌ Cloud save failed. Check connection and try again.</div>';
+    ss.innerHTML = '<div class="alert a-err">❌ Save failed. Check connection.</div>';
   }
 }
 
 // ═══════════════════════════════════════════
-// CAPTAIN EDITOR
-// ═══════════════════════════════════════════
-function buildCapGrid(){
-  document.getElementById('cap-grid').innerHTML = TN.map(t => {
-    const curC = DB.caps[t]?.c||'', curVC = DB.caps[t]?.vc||'';
-    const opts = TEAMS[t].map(p => `<option value="${p}" ${p===curC?'selected':''}>${p}</option>`).join('');
-    const optsVC = TEAMS[t].map(p => `<option value="${p}" ${p===curVC?'selected':''}>${p}</option>`).join('');
-    return `<div class="cap-row">
-      <h4>${t}</h4>
-      <div class="cap-sel-row"><span class="cap-lbl">Captain ×2</span><select class="inp" id="cap-c-${t}" style="flex:1"><option value="">— None —</option>${opts}</select></div>
-      <div class="cap-sel-row"><span class="cap-lbl">Vice Cap ×1.5</span><select class="inp" id="cap-vc-${t}" style="flex:1"><option value="">— None —</option>${optsVC}</select></div>
-    </div>`;
-  }).join('');
-}
-async function saveCaps(){
-  if(!DB.caps) DB.caps={};
-  TN.forEach(t => {
-    DB.caps[t] = {
-      c: document.getElementById('cap-c-'+t)?.value||'',
-      vc: document.getElementById('cap-vc-'+t)?.value||''
-    };
-  });
-  const st = document.getElementById('cap-status');
-  st.innerHTML = '<div class="alert a-info"><span class="spin"></span>Saving...</div>';
-  const ok = await cloudWrite();
-  st.innerHTML = ok
-    ? '<div class="alert a-ok">✅ Captains saved! Points updated across all devices.</div>'
-    : '<div class="alert a-err">❌ Save failed. Try again.</div>';
-  if(ok){ renderStandings(); renderPS(); setTimeout(()=>st.innerHTML='',4000); }
-}
-
-// ═══════════════════════════════════════════
-// CRICAPI
+// RAPIDAPI FETCH
 // ═══════════════════════════════════════════
 async function saveKey(){
   DB.apiKey = document.getElementById('api-inp').value.trim();
@@ -757,67 +771,121 @@ async function saveKey(){
 }
 async function fetchMatches(){
   const key = document.getElementById('api-inp').value.trim()||DB.apiKey;
-  if(!key){ alert('Enter CricAPI key first.'); return; }
+  if(!key){ alert('Enter your RapidAPI key first.'); return; }
   const out = document.getElementById('matches-out');
-  out.innerHTML = '<div class="alert a-info"><span class="spin"></span>Fetching...</div>';
+  out.innerHTML = '<div class="alert a-info"><span class="spin"></span>Fetching IPL fixtures...</div>';
   try{
-    const resp = await fetch(`https://api.cricapi.com/v1/currentMatches?apikey=${key}&offset=0`);
+    // Fetch fixtures from RapidAPI Cricket API Free Data
+    const resp = await fetch('https://cricket-api-free-data.p.rapidapi.com/cricket-fixtures', {
+      headers: {
+        'x-rapidapi-host': 'cricket-api-free-data.p.rapidapi.com',
+        'x-rapidapi-key': key
+      }
+    });
     const data = await resp.json();
-    if(data.status!=='success'){ out.innerHTML=`<div class="alert a-warn">API error: ${data.message||'Check key'}</div>`; return; }
-    const all = data.data||[];
-    const KW = ['Indian Premier League','IPL','CSK','Chennai','Mumbai Indians','Royal Challengers','RCB','Kolkata Knight','KKR','Delhi Capitals','Rajasthan Royals','Punjab Kings','PBKS','Sunrisers','SRH','Gujarat Titans','Lucknow Super'];
-    const ipl = all.filter(m => { const s=(m.name||'')+' '+(m.teams||[]).join(' '); return KW.some(k=>s.toLowerCase().includes(k.toLowerCase())); });
-    const toShow = ipl.length ? ipl : all;
-    out.innerHTML = (ipl.length
-      ? `<p style="font-size:12px;color:var(--muted);margin-bottom:8px">${ipl.length} IPL match(es) — tap to load:</p>`
-      : `<div class="alert a-warn" style="margin-bottom:8px">No IPL found. Showing all ${all.length} — pick manually:</div>`) +
-      toShow.map(m => `<div class="match-item" onclick="loadCard('${m.id.replace(/'/g,"\\'")}','${((m.teams||[]).join(' vs ')).replace(/'/g,"\\'")}','${key}')">
-        <div style="font-weight:600;font-size:14px">${(m.teams||[]).join(' vs ')||m.name}</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:3px"><span class="pill ${m.matchStarted&&!m.matchEnded?'pill-live':'pill-done'}">${m.matchStarted&&!m.matchEnded?'LIVE':'DONE'}</span> ${m.status||''}</div>
-      </div>`).join('') +
-      `<details style="margin-top:10px"><summary style="font-size:11px;color:var(--muted);cursor:pointer">Debug — all ${all.length} matches</summary>
-      <pre style="font-size:10px;color:var(--muted);background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px;margin-top:6px;overflow-x:auto;white-space:pre-wrap">${all.map(m=>m.name||'unnamed').join('\n')}</pre></details>`;
+    if(data.status !== 'success'){ out.innerHTML=`<div class="alert a-warn">API error. Check your key.</div>`; return; }
+
+    // Extract all IPL matches from schedules
+    const allMatches = [];
+    const schedules = data.response?.schedules || [];
+    schedules.forEach(s => {
+      const list = s.scheduleAdWrapper?.matchScheduleList || [];
+      list.forEach(sl => {
+        if((sl.seriesName||'').toLowerCase().includes('indian premier league') || (sl.seriesName||'').toLowerCase().includes('ipl')){
+          (sl.matchInfo||[]).forEach(m => allMatches.push({...m, seriesName: sl.seriesName}));
+        }
+      });
+    });
+
+    if(!allMatches.length){
+      out.innerHTML='<div class="alert a-warn">No IPL matches found in fixtures. The match may not be in the feed yet, or try entering scores manually.</div>';
+      return;
+    }
+
+    // Sort — put today first
+    const todayStr = new Date().toISOString().split('T')[0];
+    allMatches.sort((a,b) => {
+      const da = new Date(parseInt(a.startDate));
+      const db2 = new Date(parseInt(b.startDate));
+      return da - db2;
+    });
+
+    out.innerHTML = `<p style="font-size:12px;color:var(--muted);margin-bottom:8px">${allMatches.length} IPL match(es) found — tap to load scorecard:</p>` +
+      allMatches.map(m => {
+        const t1 = m.team1?.teamName||'', t2 = m.team2?.teamName||'';
+        const matchDate = new Date(parseInt(m.startDate)).toLocaleDateString('en-IN',{day:'numeric',month:'short'});
+        return `<div class="match-item" onclick="loadRapidCard(${m.matchId},'${(t1+' vs '+t2).replace(/'/g,"\'")}','${key}')">
+          <div style="font-weight:600;font-size:14px">${t1} vs ${t2}</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:3px">${m.matchDesc} · ${matchDate} · ${m.venueInfo?.city||''}</div>
+        </div>`;
+      }).join('');
   } catch(e){ out.innerHTML=`<div class="alert a-warn">Error: ${e.message}</div>`; }
 }
-async function loadCard(id,name,key){
+
+async function loadRapidCard(matchId, matchName, key){
   const out = document.getElementById('matches-out');
   const ldr = document.createElement('div'); ldr.className='alert a-info'; ldr.innerHTML='<span class="spin"></span>Loading scorecard...'; out.appendChild(ldr);
   try{
-    const resp = await fetch(`https://api.cricapi.com/v1/match_scorecard?apikey=${key}&id=${id}`);
+    const resp = await fetch(`https://cricket-api-free-data.p.rapidapi.com/cricket-live-score?matchId=${matchId}`, {
+      headers: {
+        'x-rapidapi-host': 'cricket-api-free-data.p.rapidapi.com',
+        'x-rapidapi-key': key
+      }
+    });
     const data = await resp.json();
-    if(data.status!=='success'){ ldr.outerHTML='<div class="alert a-warn">Could not load scorecard.</div>'; return; }
+    if(data.status !== 'success'){ ldr.outerHTML='<div class="alert a-warn">Could not load scorecard. Match may not have started yet.</div>'; return; }
+
+    // Build lookup table
     const lookup = {};
     TN.forEach(t => TEAMS[t].forEach(p => {
       lookup[p.toLowerCase()] = p;
       Object.entries(ALIASES).forEach(([a,f]) => { if(f===p) lookup[a]=p; });
     }));
     const tryMatch = n => {
+      if(!n) return null;
       n = n.toLowerCase().trim();
       if(lookup[n]) return lookup[n];
       const parts = n.split(' ');
       for(let i=parts.length-1;i>=0;i--){
         const sub = parts.slice(i).join(' ');
-        if(lookup[sub]) return lookup[sub];
-        const found = Object.keys(lookup).find(k => k.includes(sub) && sub.length>3);
-        if(found) return lookup[found];
+        if(lookup[sub] && sub.length>2) return lookup[sub];
       }
-      return null;
+      // fuzzy - check if any known player name contains this
+      const found = Object.keys(lookup).find(k => (k.includes(n)||n.includes(k)) && n.length>3);
+      return found ? lookup[found] : null;
     };
-    const sc = data.data?.scorecard||[];
+
+    // Parse scorecard from RapidAPI response
+    const scorecard = data.response?.scorecard || data.response?.miniscore || {};
+    const batsmen = scorecard.batsmen || scorecard.batsmanStriker ? [scorecard.batsmanStriker, scorecard.batsmanNonStriker].filter(Boolean) : [];
+    const bowlers = scorecard.bowlers || scorecard.bowlerStriker ? [scorecard.bowlerStriker, scorecard.bowlerNonStriker].filter(Boolean) : [];
+
+    // Also try full scorecard innings
+    const innings = data.response?.scorecard?.innings || [];
     let matched = 0;
-    sc.forEach(inn => {
-      (inn.batting||[]).forEach(b => {
-        const hit = tryMatch(b.batsman?.name||b.name||'');
-        if(hit){ if(!pendingScores[hit]) pendingScores[hit]={runs:0,wkts:0}; pendingScores[hit].runs=(parseInt(pendingScores[hit].runs)||0)+(parseInt(b.r)||0); matched++; }
+
+    innings.forEach(inn => {
+      (inn.batsmen||[]).forEach(b => {
+        const hit = tryMatch(b.batName||b.name||'');
+        if(hit){ if(!pendingScores[hit]) pendingScores[hit]={runs:0,wkts:0}; pendingScores[hit].runs=(parseInt(pendingScores[hit].runs)||0)+(parseInt(b.runs||b.r)||0); matched++; }
       });
-      (inn.bowling||[]).forEach(bw => {
-        const hit = tryMatch(bw.bowler?.name||bw.name||'');
-        if(hit){ if(!pendingScores[hit]) pendingScores[hit]={runs:0,wkts:0}; pendingScores[hit].wkts=(parseInt(pendingScores[hit].wkts)||0)+(parseInt(bw.w)||0); matched++; }
+      (inn.bowlers||[]).forEach(bw => {
+        const hit = tryMatch(bw.bowlName||bw.name||'');
+        if(hit){ if(!pendingScores[hit]) pendingScores[hit]={runs:0,wkts:0}; pendingScores[hit].wkts=(parseInt(pendingScores[hit].wkts)||0)+(parseInt(bw.wickets||bw.w)||0); matched++; }
       });
     });
-    document.getElementById('e-label').value = name;
+
+    // fallback — try miniscore batsmen/bowlers
+    if(matched===0){
+      batsmen.forEach(b=>{ const hit=tryMatch(b.batName||''); if(hit){if(!pendingScores[hit])pendingScores[hit]={runs:0,wkts:0};pendingScores[hit].runs=(parseInt(pendingScores[hit].runs)||0)+(parseInt(b.runs)||0);matched++;} });
+      bowlers.forEach(bw=>{ const hit=tryMatch(bw.bowlName||''); if(hit){if(!pendingScores[hit])pendingScores[hit]={runs:0,wkts:0};pendingScores[hit].wkts=(parseInt(pendingScores[hit].wkts)||0)+(parseInt(bw.wickets)||0);matched++;} });
+    }
+
+    document.getElementById('e-label').value = matchName;
     buildEntryGrid();
-    ldr.outerHTML = `<div class="alert a-ok">✅ ${matched} player stats loaded. Review and save.</div>`;
+    ldr.outerHTML = matched>0
+      ? `<div class="alert a-ok">✅ ${matched} player stats loaded! Review below and save.</div>`
+      : `<div class="alert a-warn">⚠️ Match found but no player scores could be matched. The match may still be live or data format changed. Enter manually below.</div>`;
   } catch(e){ ldr.outerHTML=`<div class="alert a-warn">Error: ${e.message}</div>`; }
 }
 
