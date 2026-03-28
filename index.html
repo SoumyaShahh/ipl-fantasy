@@ -185,6 +185,25 @@ select.inp option{background:var(--surf)}
 .team-pill{background:var(--card2);border:1px solid var(--border);color:var(--muted);padding:8px 16px;border-radius:20px;cursor:pointer;font-size:13px;font-weight:500;transition:all .15s;white-space:nowrap}
 .team-pill:active{opacity:.8}
 .team-pill.active{background:var(--gold);border-color:var(--gold);color:#000;font-weight:600}
+
+/* SCORE ENTRY STEPS */
+.score-step{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:0}
+.step-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:12px;font-weight:600}
+.selected-match-banner{background:linear-gradient(135deg,rgba(240,180,41,.15),rgba(240,180,41,.05));border:1px solid rgba(240,180,41,.3);border-radius:10px;padding:12px 16px;margin-bottom:14px;font-weight:600;font-size:15px;color:var(--gold)}
+.match-card{background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;cursor:pointer;transition:all .2s;margin-bottom:8px;display:flex;align-items:center;gap:12px}
+.match-card:active{opacity:.8}
+.match-card:hover{border-color:var(--gold)}
+.match-card.selected{border-color:var(--gold);background:rgba(240,180,41,.08)}
+.match-teams{font-weight:600;font-size:15px;flex:1}
+.match-meta{font-size:11px;color:var(--muted);margin-top:2px}
+.match-arrow{color:var(--muted);font-size:18px;flex-shrink:0}
+.player-score-card{background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px}
+.player-score-card-title{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;font-weight:600}
+.ipl-team-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin-bottom:4px}
+.ipl-team-btn{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;cursor:pointer;font-size:13px;font-weight:500;color:var(--muted);transition:all .2s;text-align:center}
+.ipl-team-btn:active{opacity:.8}
+.ipl-team-btn.active{background:rgba(240,180,41,.12);border-color:var(--gold);color:var(--gold);font-weight:600}
+.fantasy-team-badge{font-size:10px;background:var(--surf);border:1px solid var(--border);padding:2px 8px;border-radius:10px;color:var(--muted);margin-left:6px;white-space:nowrap}
 </style>
 </head>
 <body>
@@ -268,53 +287,66 @@ select.inp option{background:var(--surf)}
     </div>
   </div>
   <div id="admin-panel" style="display:none">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
       <div class="page-title" style="margin:0">Add Scores</div>
       <button class="btn-ghost" onclick="doLogout()">Logout</button>
     </div>
 
-    <!-- AUTO FETCH -->
-    <div class="sec-hdr" style="margin-top:0">🌐 Auto-fetch Live Scores</div>
-    <div class="alert a-info" style="font-size:12px">Uses RapidAPI Cricket API Free Data. Save your key once.</div>
-    <div class="row" style="margin-bottom:8px">
-      <input type="text" class="inp" id="api-inp" placeholder="Paste RapidAPI key" style="flex:1">
-      <button class="btn btn-out btn-sm" onclick="saveKey()">Save</button>
+    <!-- STEP 1: API KEY -->
+    <div class="score-step">
+      <div class="step-label">Step 1 — Connect to Live Scores</div>
+      <div class="row" style="margin-bottom:8px;gap:8px">
+        <input type="text" class="inp" id="api-inp" placeholder="Paste RapidAPI key (cricket-api-free-data)" style="flex:1">
+        <button class="btn btn-out btn-sm" onclick="saveKey()">Save</button>
+      </div>
+      <button class="btn" onclick="fetchIPLSchedule()" id="fetch-btn">🏏 Load IPL Schedule</button>
+      <div id="matches-out" style="margin-top:12px"></div>
     </div>
-    <button class="btn" style="margin-bottom:0" onclick="fetchMatches()">Fetch Today's IPL Matches</button>
-    <div id="matches-out" style="margin-top:10px"></div>
 
     <div class="sep"></div>
 
-    <!-- MATCH INFO -->
-    <div class="sec-hdr" style="margin-top:0">📅 Match Details</div>
-    <div class="row" style="margin-bottom:12px;flex-wrap:wrap;gap:8px">
-      <input type="date" class="inp" id="e-date" style="width:155px;flex-shrink:0">
-      <input type="text" class="inp" id="e-label" placeholder="e.g. RCB vs SRH" style="flex:1;min-width:140px">
+    <!-- STEP 2: SCORE ENTRY (shown after match selected) -->
+    <div id="score-entry-section" style="display:none">
+      <div class="step-label">Step 2 — Enter Scores</div>
+      <div class="selected-match-banner" id="selected-match-banner"></div>
+      <div class="alert a-info" style="font-size:12px;margin-bottom:14px">
+        Showing all your fantasy players from both IPL teams. Enter runs scored and wickets taken.<br>
+        <strong>1 run = 1pt · 1 wicket = 20pts · C = ×2 · VC = ×1.5</strong>
+      </div>
+      <div id="e-grid"></div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap">
+        <button class="btn btn-out btn-sm" onclick="clearEntry()">Clear Scores</button>
+        <button class="btn btn-sm" style="width:auto" onclick="saveEntry()">💾 Save to Cloud</button>
+      </div>
+      <div id="save-status" style="margin-top:10px"></div>
     </div>
-    <div class="alert a-info" style="font-size:12px">1 run = 1pt &nbsp;·&nbsp; 1 wicket = 20pts &nbsp;·&nbsp; Captain ×2 &nbsp;·&nbsp; Vice Captain ×1.5</div>
 
-    <!-- TEAM SELECTOR -->
-    <div class="sec-hdr">🏏 Select Team to Enter Scores</div>
-    <div class="team-select-card">
-      <div class="team-pills" id="team-pills"></div>
+    <!-- MANUAL ENTRY FALLBACK -->
+    <div id="manual-section">
+      <div class="step-label">Manual Entry — Select IPL Team</div>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:12px">Pick the IPL team(s) that played today and enter scores for your fantasy players from that team.</p>
+      <div class="ipl-team-grid" id="ipl-team-grid"></div>
+      <div id="manual-grid" style="margin-top:12px"></div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap" id="manual-save-row" style="display:none">
+        <input type="date" class="inp" id="e-date" style="width:155px;flex-shrink:0">
+        <input type="text" class="inp" id="e-label" placeholder="Match label e.g. RCB vs SRH" style="flex:1;min-width:140px">
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px">
+        <button class="btn btn-out btn-sm" onclick="clearEntry()">Clear</button>
+        <button class="btn btn-sm" style="width:auto" onclick="saveEntry()">💾 Save to Cloud</button>
+      </div>
+      <div id="save-status2" style="margin-top:10px"></div>
     </div>
-    <div id="e-grid"></div>
-    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
-      <button class="btn btn-out btn-sm" onclick="clearEntry()">Clear All</button>
-      <button class="btn btn-sm" style="width:auto" onclick="saveEntry()">💾 Save to Cloud</button>
-    </div>
-    <div id="save-status" style="margin-top:10px"></div>
 
     <div class="sep"></div>
 
-    <!-- CAPTAINS -->
-    <div class="sec-hdr" style="margin-top:0">🎖️ Captain & Vice Captain</div>
-    <div class="alert a-info" style="font-size:12px">Captain ×2 points, Vice Captain ×1.5 points. Set once, change anytime.</div>
+    <!-- CAPTAIN & VC -->
+    <div class="step-label">🎖️ Captain & Vice Captain</div>
+    <div class="alert a-info" style="font-size:12px;margin-bottom:12px">Captain scores ×2 points. Vice Captain scores ×1.5 points. Set once per team — change anytime.</div>
     <div id="cap-grid"></div>
-    <button class="btn btn-sm" style="width:auto;margin-top:4px" onclick="saveCaps()">Save Captains to Cloud</button>
+    <button class="btn btn-sm" style="width:auto;margin-top:8px" onclick="saveCaps()">Save Captains to Cloud</button>
     <div id="cap-status" style="margin-top:10px"></div>
   </div>
-</div>
 
 <!-- ROSTER -->
 <div class="page" id="page-roster">
@@ -684,210 +716,307 @@ async function delDay(date){
 // ═══════════════════════════════════════════
 // SCORE ENTRY
 // ═══════════════════════════════════════════
-function buildEntryTabs(){
-  // Build team pills
-  document.getElementById('team-pills').innerHTML = TN.map(t =>
-    `<div class="team-pill ${t===curTab?'active':''}" onclick="selTab('${t}')">${t}</div>`
-  ).join('');
-  buildEntryGrid();
-  const di = document.getElementById('e-date');
-  if(!di.value) di.value = new Date().toISOString().split('T')[0];
-}
-function selTab(t){ curTab=t; buildEntryTabs(); }
-function buildEntryGrid(){
-  const players = TEAMS[curTab];
-  const c = DB.caps[curTab]?.c, vc = DB.caps[curTab]?.vc;
-  if(!players||!players.length){
-    document.getElementById('e-grid').innerHTML='<p style="color:var(--muted);padding:1rem">No players in this team.</p>';
-    return;
-  }
-  document.getElementById('e-grid').innerHTML = `<div class="entry-card">
-    <div style="font-size:13px;font-weight:600;margin-bottom:12px;color:var(--text)">${curTab}'s Players</div>
-    <div style="display:grid;grid-template-columns:1fr 60px 60px 46px;gap:6px;font-size:10px;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.8px;padding:0 2px">
-      <span>Player</span><span style="text-align:center">Runs</span><span style="text-align:center">Wkts</span><span style="text-align:right">Pts</span>
-    </div>
-    ${players.map((p,i) => {
-      const ex = pendingScores[p]||{};
-      const iC = c&&p===c, iVC = vc&&p===vc;
-      const badge = iC?'<span class="pe-badge pe-c" style="margin-right:4px">C</span>':iVC?'<span class="pe-badge pe-vc" style="margin-right:4px">VC</span>':'';
-      const raw = calcRaw(ex.runs,ex.wkts);
-      const pts = iC?raw*2:iVC?Math.round(raw*1.5):raw;
-      const safe = p.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-      const hasScore = ex.runs||ex.wkts;
-      return `<div class="pe-row" style="${hasScore?'background:rgba(240,180,41,.06);border-radius:8px;padding:4px 6px;margin:-4px -6px 4px':''}">
-        <div class="pe-name" style="font-size:13px">${badge}${p}</div>
-        <input type="number" class="pe-inp" id="r-${i}" placeholder="0" min="0" value="${ex.runs||''}" inputmode="numeric" oninput="upEntry('${safe}',${i})">
-        <input type="number" class="pe-inp" id="w-${i}" placeholder="0" min="0" max="10" value="${ex.wkts||''}" inputmode="numeric" oninput="upEntry('${safe}',${i})">
-        <div class="pe-pts" id="pt-${i}" style="${pts>0?'color:var(--gold)':'color:var(--muted)'}">${pts>0?pts+'p':'—'}</div>
-      </div>`;
-    }).join('')}
-    <div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border);display:flex;justify-content:space-between;font-size:12px;color:var(--muted)">
-      <span>Players with scores: <strong style="color:var(--text)">${Object.keys(pendingScores).filter(p=>TEAMS[curTab].includes(p)).length}</strong></span>
-      <span>Team total today: <strong style="color:var(--gold)">${Object.entries(pendingScores).filter(([p])=>TEAMS[curTab].includes(p)).reduce((s,[p,{runs,wkts}])=>s+calcPts(p,curTab,runs,wkts),0)}pts</strong></span>
-    </div>
-  </div>`;
-}
-function upEntry(player,i){
-  const r=document.getElementById('r-'+i)?.value||'', w=document.getElementById('w-'+i)?.value||'';
-  if(r||w) pendingScores[player]={runs:r,wkts:w}; else delete pendingScores[player];
-  const t = TN.find(t=>TEAMS[t].includes(player))||curTab;
-  const c=DB.caps[t]?.c, vc=DB.caps[t]?.vc;
-  const raw=calcRaw(r,w);
-  const pts = c&&player===c?raw*2:vc&&player===vc?Math.round(raw*1.5):raw;
-  const el=document.getElementById('pt-'+i);
-  el.textContent=pts>0?pts+'p':'—';
-  el.style.color=pts>0?'var(--gold)':'var(--muted)';
-  // refresh summary
-  buildEntryGrid();
-}
-function clearEntry(){ pendingScores={}; buildEntryGrid(); }
-async function saveEntry(){
-  if(!Object.keys(pendingScores).length){ alert('No scores entered!'); return; }
-  const date = document.getElementById('e-date').value || new Date().toISOString().split('T')[0];
-  const label = document.getElementById('e-label').value || 'Match';
-  const ss = document.getElementById('save-status');
-  ss.innerHTML = '<div class="alert a-info"><span class="spin"></span>Saving to cloud...</div>';
-  const ex = DB.history.findIndex(d => d.date===date);
-  if(ex>=0) DB.history[ex].scores = {...DB.history[ex].scores,...pendingScores};
-  else DB.history.push({date,label,scores:{...pendingScores}});
-  DB.history.sort((a,b) => a.date.localeCompare(b.date));
-  const ok = await cloudWrite();
-  if(ok){
-    ss.innerHTML = '<div class="alert a-ok">✅ Scores saved! All devices updated.</div>';
-    pendingScores={}; buildEntryGrid(); renderStandings(); renderPS(); renderHistory();
-    setTimeout(()=>ss.innerHTML='',4000);
-  } else {
-    ss.innerHTML = '<div class="alert a-err">❌ Save failed. Check connection.</div>';
-  }
+// IPL TEAM ROSTERS (which IPL team each player plays for)
+const IPL_TEAMS = {
+  "CSK": ["Ruturaj Gaikwad","Ayush Mhatre","Rahul Chahar","Trent Boult","Deepak Chahar","MS Dhoni","Ravindra Jadeja"],
+  "MI":  ["Rohit Sharma","Tilak Varma","Hardik Pandya","Jasprit Bumrah","Suryakumar Yadav","Naman Dhir","Ryan Rickleton","Shivam Mavi","Will Jacks","Deepak Chahar"],
+  "RCB": ["Virat Kohli","Phil Salt","Bhuvneshwar Kumar","Josh Inglis","Jacob Bethell","Krunal Pandya","Liam Livingstone","Rasikh Dar","Suyash Sharma","Lungi Ngidi","Romario Shepherd"],
+  "KKR": ["Ajinkya Rahane","Rinku Singh","Varun Chakravarthy","Sunil Narine","Andre Russell","Angkrish Raghuvanshi","Venkatesh Iyer","Ramandeep Singh","Mayank Markande","Harshit Rana"],
+  "SRH": ["Travis Head","Abhishek Sharma","Nitish Kumar Reddy","Harshal Patel","Mohammed Shami","Heinrich Klassen","Brydon Carse","Aniket Verma","Jaydev Unadkat","Pat Cummins"],
+  "RR":  ["Yashasvi Jaiswal","Riyan Parag","Shimron Hetmyer","Jos Buttler","Yuzvendra Chahal","Jofra Archer","Dhruv Jurel","Wanindu Hasaranga","Sandeep Sharma","Shubham Dubey"],
+  "PBKS": ["Shashank Singh","Prabhsimran Singh","Arshdeep Singh","Marco Jansen","Nehal Wadhera","Ravi Bishnoi","Azmatullah Omarzai","Harpreet Brar","Kagiso Rabada","Lockie Ferguson"],
+  "GT":  ["Shubman Gill","Rashid Khan","Shahrukh Khan","Sai Sudharshan","Rahul Tewatia","Mohammed Siraj","Prasidh Krishna","Mahipal Lomror","Manav Suthar","Noor Ahmad"],
+  "LSG": ["KL Rahul","Nicholas Pooran","Avesh Khan","Ravi Bishnoi","Mitchell Marsh","David Miller","Aryan Badoni","Mayank Yadav","Digvesh Rathi","Aiden Markram","Shahbaz Ahmed"],
+  "DC":  ["Axar Patel","Rishabh Pant","Kuldeep Yadav","Tristan Stubbs","Jake Fraser-McGurk","Faf du Plessis","Mukesh Kumar","Ashutosh Sharma","Donovan Ferreira","Vipraj Nigam","T Natarajan","Sameer Rizvi"]
+};
+
+// Build reverse: player name → IPL team
+function buildPlayerIPLMap(){
+  const map={};
+  Object.entries(IPL_TEAMS).forEach(([ipl,players])=>players.forEach(p=>map[p.toLowerCase()]=ipl));
+  return map;
 }
 
-// ═══════════════════════════════════════════
-// RAPIDAPI FETCH
-// ═══════════════════════════════════════════
-async function saveKey(){
-  DB.apiKey = document.getElementById('api-inp').value.trim();
-  await cloudWrite();
-  const b=event.target; b.textContent='Saved ✓'; setTimeout(()=>b.textContent='Save',2000);
-}
-async function fetchMatches(){
-  const key = document.getElementById('api-inp').value.trim()||DB.apiKey;
-  if(!key){ alert('Enter your RapidAPI key first.'); return; }
-  const out = document.getElementById('matches-out');
-  out.innerHTML = '<div class="alert a-info"><span class="spin"></span>Fetching IPL fixtures...</div>';
-  try{
-    // Fetch fixtures from RapidAPI Cricket API Free Data
-    const resp = await fetch('https://cricket-api-free-data.p.rapidapi.com/cricket-fixtures', {
-      headers: {
-        'x-rapidapi-host': 'cricket-api-free-data.p.rapidapi.com',
-        'x-rapidapi-key': key
+// Get all fantasy players who play for a given IPL team
+function getFantasyPlayersForIPLTeam(iplTeam){
+  const iplRoster = (IPL_TEAMS[iplTeam]||[]).map(p=>p.toLowerCase());
+  const result = [];
+  TN.forEach(fantasyTeam => {
+    TEAMS[fantasyTeam].forEach(player => {
+      if(iplRoster.includes(player.toLowerCase())){
+        result.push({player, fantasyTeam});
       }
     });
-    const data = await resp.json();
-    if(data.status !== 'success'){ out.innerHTML=`<div class="alert a-warn">API error. Check your key.</div>`; return; }
+  });
+  return result;
+}
 
-    // Extract all IPL matches from schedules
-    const allMatches = [];
-    const schedules = data.response?.schedules || [];
-    schedules.forEach(s => {
-      const list = s.scheduleAdWrapper?.matchScheduleList || [];
-      list.forEach(sl => {
-        if((sl.seriesName||'').toLowerCase().includes('indian premier league') || (sl.seriesName||'').toLowerCase().includes('ipl')){
-          (sl.matchInfo||[]).forEach(m => allMatches.push({...m, seriesName: sl.seriesName}));
+// Current selected IPL teams for manual entry
+let selectedIPLTeams = new Set();
+let selectedMatchLabel = '';
+
+function buildEntryTabs(){ buildIPLTeamGrid(); }
+function selTab(t){ curTab=t; }
+
+function buildIPLTeamGrid(){
+  const grid = document.getElementById('ipl-team-grid');
+  if(!grid) return;
+  const teams = Object.keys(IPL_TEAMS);
+  grid.innerHTML = teams.map(t => `
+    <div class="ipl-team-btn ${selectedIPLTeams.has(t)?'active':''}" onclick="toggleIPLTeam('${t}')">
+      ${t}
+    </div>`).join('');
+  renderManualGrid();
+  // show save row
+  const saveRow = document.getElementById('manual-save-row');
+  if(saveRow) saveRow.style.display='flex';
+  const di = document.getElementById('e-date');
+  if(di && !di.value) di.value = new Date().toISOString().split('T')[0];
+}
+
+function toggleIPLTeam(t){
+  if(selectedIPLTeams.has(t)) selectedIPLTeams.delete(t);
+  else selectedIPLTeams.add(t);
+  buildIPLTeamGrid();
+}
+
+function renderManualGrid(){
+  const grid = document.getElementById('manual-grid');
+  if(!grid) return;
+  if(!selectedIPLTeams.size){
+    grid.innerHTML = '<p style="color:var(--muted);font-size:13px;text-align:center;padding:1rem">Select one or two IPL teams above to see your fantasy players</p>';
+    return;
+  }
+  // Collect all relevant fantasy players
+  const allPlayers = [];
+  selectedIPLTeams.forEach(ipl => {
+    getFantasyPlayersForIPLTeam(ipl).forEach(({player,fantasyTeam}) => {
+      if(!allPlayers.find(x=>x.player===player)) allPlayers.push({player,fantasyTeam,ipl});
+    });
+  });
+  if(!allPlayers.length){
+    grid.innerHTML = '<p style="color:var(--muted);font-size:13px;text-align:center;padding:1rem">No fantasy players found for selected teams. Try selecting different teams.</p>';
+    return;
+  }
+  // Group by IPL team
+  const byIPL = {};
+  selectedIPLTeams.forEach(t => byIPL[t]=[]);
+  allPlayers.forEach(x => { if(byIPL[x.ipl]) byIPL[x.ipl].push(x); });
+
+  grid.innerHTML = Object.entries(byIPL).map(([ipl, players]) => {
+    if(!players.length) return '';
+    return `<div class="player-score-card">
+      <div class="player-score-card-title">🏏 ${ipl} Players in Your Fantasy Teams</div>
+      <div style="display:grid;grid-template-columns:1fr 60px 60px 50px;gap:4px;font-size:10px;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.7px">
+        <span>Player (Fantasy Team)</span><span style="text-align:center">Runs</span><span style="text-align:center">Wkts</span><span style="text-align:right">Pts</span>
+      </div>
+      ${players.map(({player,fantasyTeam},i) => {
+        const ex = pendingScores[player]||{};
+        const c=DB.caps[fantasyTeam]?.c, vc=DB.caps[fantasyTeam]?.vc;
+        const iC=c&&player===c, iVC=vc&&player===vc;
+        const badge=iC?'<span class="pe-badge pe-c">C</span>':iVC?'<span class="pe-badge pe-vc">VC</span>':'';
+        const raw=calcRaw(ex.runs,ex.wkts);
+        const pts=iC?raw*2:iVC?Math.round(raw*1.5):raw;
+        const uid=ipl+'-'+i;
+        const safe=player.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+        return `<div class="pe-row" style="${ex.runs||ex.wkts?'background:rgba(240,180,41,.06);border-radius:8px;padding:4px 6px;margin:-4px -6px 4px':''}">
+          <div class="pe-name">${badge} ${player}<span class="fantasy-team-badge">${fantasyTeam}</span></div>
+          <input type="number" class="pe-inp" id="ri-${uid}" placeholder="0" min="0" value="${ex.runs||''}" inputmode="numeric" oninput="upEntryManual('${safe}','${uid}','${fantasyTeam}')">
+          <input type="number" class="pe-inp" id="wi-${uid}" placeholder="0" min="0" max="10" value="${ex.wkts||''}" inputmode="numeric" oninput="upEntryManual('${safe}','${uid}','${fantasyTeam}')">
+          <div class="pe-pts" id="pti-${uid}" style="color:${pts>0?'var(--gold)':'var(--muted)'}">${pts>0?pts+'p':'—'}</div>
+        </div>`;
+      }).join('')}
+    </div>`;
+  }).join('');
+}
+
+function upEntryManual(player,uid,fantasyTeam){
+  const r=document.getElementById('ri-'+uid)?.value||'';
+  const w=document.getElementById('wi-'+uid)?.value||'';
+  if(r||w) pendingScores[player]={runs:r,wkts:w}; else delete pendingScores[player];
+  const c=DB.caps[fantasyTeam]?.c,vc=DB.caps[fantasyTeam]?.vc;
+  const raw=calcRaw(r,w);
+  const pts=c&&player===c?raw*2:vc&&player===vc?Math.round(raw*1.5):raw;
+  const el=document.getElementById('pti-'+uid);
+  if(el){el.textContent=pts>0?pts+'p':'—';el.style.color=pts>0?'var(--gold)':'var(--muted)';}
+}
+
+function upEntry(player,i){
+  const r=document.getElementById('r-'+i)?.value||'',w=document.getElementById('w-'+i)?.value||'';
+  if(r||w) pendingScores[player]={runs:r,wkts:w}; else delete pendingScores[player];
+  const t=TN.find(t=>TEAMS[t].includes(player))||curTab;
+  const c=DB.caps[t]?.c,vc=DB.caps[t]?.vc;
+  const raw=calcRaw(r,w);
+  const pts=c&&player===c?raw*2:vc&&player===vc?Math.round(raw*1.5):raw;
+  const el=document.getElementById('pt-'+i);
+  if(el){el.textContent=pts>0?pts+'p':'—';el.style.color=pts>0?'var(--gold)':'var(--muted)';}
+}
+
+function buildEntryGrid(){
+  // Used for auto-fetch flow
+  const section=document.getElementById('score-entry-section');
+  if(!section) return;
+  const iplTeams=Array.from(selectedIPLTeams);
+  const allPlayers=[];
+  iplTeams.forEach(ipl=>{
+    getFantasyPlayersForIPLTeam(ipl).forEach(({player,fantasyTeam})=>{
+      if(!allPlayers.find(x=>x.player===player)) allPlayers.push({player,fantasyTeam,ipl});
+    });
+  });
+  if(!allPlayers.length){
+    document.getElementById('e-grid').innerHTML='<p style="color:var(--muted);font-size:13px;text-align:center;padding:1rem">No fantasy players found for this match.</p>';
+    return;
+  }
+  const byIPL={};
+  iplTeams.forEach(t=>byIPL[t]=[]);
+  allPlayers.forEach(x=>{if(byIPL[x.ipl])byIPL[x.ipl].push(x);});
+  document.getElementById('e-grid').innerHTML=Object.entries(byIPL).map(([ipl,players])=>{
+    if(!players.length) return '';
+    return `<div class="player-score-card">
+      <div class="player-score-card-title">🏏 ${ipl} Players in Your Fantasy Teams</div>
+      <div style="display:grid;grid-template-columns:1fr 60px 60px 50px;gap:4px;font-size:10px;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.7px">
+        <span>Player (Fantasy Team)</span><span style="text-align:center">Runs</span><span style="text-align:center">Wkts</span><span style="text-align:right">Pts</span>
+      </div>
+      ${players.map(({player,fantasyTeam},i)=>{
+        const ex=pendingScores[player]||{};
+        const c=DB.caps[fantasyTeam]?.c,vc=DB.caps[fantasyTeam]?.vc;
+        const iC=c&&player===c,iVC=vc&&player===vc;
+        const badge=iC?'<span class="pe-badge pe-c">C</span>':iVC?'<span class="pe-badge pe-vc">VC</span>':'';
+        const raw=calcRaw(ex.runs,ex.wkts);
+        const pts=iC?raw*2:iVC?Math.round(raw*1.5):raw;
+        const uid=ipl+i;
+        const safe=player.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+        return `<div class="pe-row" style="${ex.runs||ex.wkts?'background:rgba(240,180,41,.06);border-radius:8px;padding:4px 6px;margin:-4px -6px 4px':''}">
+          <div class="pe-name">${badge} ${player}<span class="fantasy-team-badge">${fantasyTeam}</span></div>
+          <input type="number" class="pe-inp" id="r-${uid}" placeholder="0" min="0" value="${ex.runs||''}" inputmode="numeric" oninput="upEntry('${safe}','${uid}')">
+          <input type="number" class="pe-inp" id="w-${uid}" placeholder="0" min="0" max="10" value="${ex.wkts||''}" inputmode="numeric" oninput="upEntry('${safe}','${uid}')">
+          <div class="pe-pts" id="pt-${uid}" style="color:${pts>0?'var(--gold)':'var(--muted)'}">${pts>0?pts+'p':'—'}</div>
+        </div>`;
+      }).join('')}
+    </div>`;
+  }).join('');
+}
+
+function clearEntry(){
+  pendingScores={};
+  renderManualGrid();
+  buildEntryGrid();
+}
+
+async function saveEntry(){
+  const dateEl=document.getElementById('e-date');
+  const labelEl=document.getElementById('e-label');
+  if(!Object.keys(pendingScores).length){alert('No scores entered!');return;}
+  const date=(dateEl?.value)||new Date().toISOString().split('T')[0];
+  const label=(labelEl?.value)||selectedMatchLabel||'Match';
+  const statusId=document.getElementById('save-status')?'save-status':'save-status2';
+  const ss=document.getElementById(statusId)||document.getElementById('save-status');
+  if(ss) ss.innerHTML='<div class="alert a-info"><span class="spin"></span>Saving to cloud...</div>';
+  const ex=DB.history.findIndex(d=>d.date===date);
+  if(ex>=0) DB.history[ex].scores={...DB.history[ex].scores,...pendingScores};
+  else DB.history.push({date,label,scores:{...pendingScores}});
+  DB.history.sort((a,b)=>a.date.localeCompare(b.date));
+  const ok=await cloudWrite();
+  if(ok){
+    if(ss) ss.innerHTML='<div class="alert a-ok">✅ Scores saved! All devices updated.</div>';
+    pendingScores={};
+    selectedIPLTeams.clear();
+    buildIPLTeamGrid();
+    buildEntryGrid();
+    renderStandings();renderPS();renderHistory();
+    setTimeout(()=>{if(ss)ss.innerHTML='';},4000);
+  } else {
+    if(ss) ss.innerHTML='<div class="alert a-err">❌ Save failed. Check connection.</div>';
+  }
+}
+
+// ═══════════════════════════════════════════
+// RAPIDAPI — IPL SCHEDULE + SCORECARD
+// ═══════════════════════════════════════════
+async function saveKey(){
+  DB.apiKey=document.getElementById('api-inp').value.trim();
+  await cloudWrite();
+  const b=event.target;b.textContent='Saved ✓';setTimeout(()=>b.textContent='Save',2000);
+}
+
+async function fetchIPLSchedule(){
+  const key=document.getElementById('api-inp').value.trim()||DB.apiKey;
+  if(!key){alert('Enter your RapidAPI key first.');return;}
+  const out=document.getElementById('matches-out');
+  out.innerHTML='<div class="alert a-info"><span class="spin"></span>Loading IPL schedule...</div>';
+  try{
+    const resp=await fetch('https://cricket-api-free-data.p.rapidapi.com/cricket-fixtures',{
+      headers:{'x-rapidapi-host':'cricket-api-free-data.p.rapidapi.com','x-rapidapi-key':key}
+    });
+    const data=await resp.json();
+    if(data.status!=='success'){out.innerHTML=`<div class="alert a-warn">API error. Check your RapidAPI key.</div>`;return;}
+    const allIPL=[];
+    (data.response?.schedules||[]).forEach(s=>{
+      (s.scheduleAdWrapper?.matchScheduleList||[]).forEach(sl=>{
+        if((sl.seriesName||'').toLowerCase().includes('indian premier league')){
+          (sl.matchInfo||[]).forEach(m=>allIPL.push({...m,seriesName:sl.seriesName}));
         }
       });
     });
-
-    if(!allMatches.length){
-      out.innerHTML='<div class="alert a-warn">No IPL matches found in fixtures. The match may not be in the feed yet, or try entering scores manually.</div>';
-      return;
+    if(!allIPL.length){
+      out.innerHTML='<div class="alert a-warn">No IPL matches found. Use manual entry below.</div>';return;
     }
-
-    // Sort — put today first
-    const todayStr = new Date().toISOString().split('T')[0];
-    allMatches.sort((a,b) => {
-      const da = new Date(parseInt(a.startDate));
-      const db2 = new Date(parseInt(b.startDate));
-      return da - db2;
+    // Sort by date
+    allIPL.sort((a,b)=>parseInt(a.startDate)-parseInt(b.startDate));
+    // Find today
+    const now=Date.now();
+    const todayMatches=allIPL.filter(m=>{
+      const d=parseInt(m.startDate);
+      return d>=now-86400000&&d<=now+86400000;
     });
-
-    out.innerHTML = `<p style="font-size:12px;color:var(--muted);margin-bottom:8px">${allMatches.length} IPL match(es) found — tap to load scorecard:</p>` +
-      allMatches.map(m => {
-        const t1 = m.team1?.teamName||'', t2 = m.team2?.teamName||'';
-        const matchDate = new Date(parseInt(m.startDate)).toLocaleDateString('en-IN',{day:'numeric',month:'short'});
-        return `<div class="match-item" onclick="loadRapidCard(${m.matchId},'${(t1+' vs '+t2).replace(/'/g,"\'")}','${key}')">
-          <div style="font-weight:600;font-size:14px">${t1} vs ${t2}</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:3px">${m.matchDesc} · ${matchDate} · ${m.venueInfo?.city||''}</div>
-        </div>`;
-      }).join('');
-  } catch(e){ out.innerHTML=`<div class="alert a-warn">Error: ${e.message}</div>`; }
-}
-
-async function loadRapidCard(matchId, matchName, key){
-  const out = document.getElementById('matches-out');
-  const ldr = document.createElement('div'); ldr.className='alert a-info'; ldr.innerHTML='<span class="spin"></span>Loading scorecard...'; out.appendChild(ldr);
-  try{
-    const resp = await fetch(`https://cricket-api-free-data.p.rapidapi.com/cricket-live-score?matchId=${matchId}`, {
-      headers: {
-        'x-rapidapi-host': 'cricket-api-free-data.p.rapidapi.com',
-        'x-rapidapi-key': key
-      }
-    });
-    const data = await resp.json();
-    if(data.status !== 'success'){ ldr.outerHTML='<div class="alert a-warn">Could not load scorecard. Match may not have started yet.</div>'; return; }
-
-    // Build lookup table
-    const lookup = {};
-    TN.forEach(t => TEAMS[t].forEach(p => {
-      lookup[p.toLowerCase()] = p;
-      Object.entries(ALIASES).forEach(([a,f]) => { if(f===p) lookup[a]=p; });
-    }));
-    const tryMatch = n => {
-      if(!n) return null;
-      n = n.toLowerCase().trim();
-      if(lookup[n]) return lookup[n];
-      const parts = n.split(' ');
-      for(let i=parts.length-1;i>=0;i--){
-        const sub = parts.slice(i).join(' ');
-        if(lookup[sub] && sub.length>2) return lookup[sub];
-      }
-      // fuzzy - check if any known player name contains this
-      const found = Object.keys(lookup).find(k => (k.includes(n)||n.includes(k)) && n.length>3);
-      return found ? lookup[found] : null;
+    const upcoming=allIPL.filter(m=>parseInt(m.startDate)>now+86400000).slice(0,5);
+    const past=allIPL.filter(m=>parseInt(m.startDate)<now-86400000).slice(-5).reverse();
+    const renderMatch=(m,label)=>{
+      const t1=m.team1?.teamSName||m.team1?.teamName||'';
+      const t2=m.team2?.teamSName||m.team2?.teamName||'';
+      const fullName=`${m.team1?.teamName||''} vs ${m.team2?.teamName||''}`;
+      const d=new Date(parseInt(m.startDate));
+      const dateStr=d.toLocaleDateString('en-IN',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+      const isToday=Math.abs(parseInt(m.startDate)-now)<86400000;
+      return `<div class="match-card ${isToday?'selected':''}" onclick="selectMatch('${t1}','${t2}','${fullName.replace(/'/g,"\'")}','${m.matchId||''}','${key}')">
+        <div style="flex:1">
+          <div class="match-teams">${t1} vs ${t2}</div>
+          <div class="match-meta">${m.matchDesc||''} · ${dateStr} · ${m.venueInfo?.city||''}</div>
+        </div>
+        <div class="match-arrow">▶</div>
+      </div>`;
     };
-
-    // Parse scorecard from RapidAPI response
-    const scorecard = data.response?.scorecard || data.response?.miniscore || {};
-    const batsmen = scorecard.batsmen || scorecard.batsmanStriker ? [scorecard.batsmanStriker, scorecard.batsmanNonStriker].filter(Boolean) : [];
-    const bowlers = scorecard.bowlers || scorecard.bowlerStriker ? [scorecard.bowlerStriker, scorecard.bowlerNonStriker].filter(Boolean) : [];
-
-    // Also try full scorecard innings
-    const innings = data.response?.scorecard?.innings || [];
-    let matched = 0;
-
-    innings.forEach(inn => {
-      (inn.batsmen||[]).forEach(b => {
-        const hit = tryMatch(b.batName||b.name||'');
-        if(hit){ if(!pendingScores[hit]) pendingScores[hit]={runs:0,wkts:0}; pendingScores[hit].runs=(parseInt(pendingScores[hit].runs)||0)+(parseInt(b.runs||b.r)||0); matched++; }
-      });
-      (inn.bowlers||[]).forEach(bw => {
-        const hit = tryMatch(bw.bowlName||bw.name||'');
-        if(hit){ if(!pendingScores[hit]) pendingScores[hit]={runs:0,wkts:0}; pendingScores[hit].wkts=(parseInt(pendingScores[hit].wkts)||0)+(parseInt(bw.wickets||bw.w)||0); matched++; }
-      });
-    });
-
-    // fallback — try miniscore batsmen/bowlers
-    if(matched===0){
-      batsmen.forEach(b=>{ const hit=tryMatch(b.batName||''); if(hit){if(!pendingScores[hit])pendingScores[hit]={runs:0,wkts:0};pendingScores[hit].runs=(parseInt(pendingScores[hit].runs)||0)+(parseInt(b.runs)||0);matched++;} });
-      bowlers.forEach(bw=>{ const hit=tryMatch(bw.bowlName||''); if(hit){if(!pendingScores[hit])pendingScores[hit]={runs:0,wkts:0};pendingScores[hit].wkts=(parseInt(pendingScores[hit].wkts)||0)+(parseInt(bw.wickets)||0);matched++;} });
-    }
-
-    document.getElementById('e-label').value = matchName;
-    buildEntryGrid();
-    ldr.outerHTML = matched>0
-      ? `<div class="alert a-ok">✅ ${matched} player stats loaded! Review below and save.</div>`
-      : `<div class="alert a-warn">⚠️ Match found but no player scores could be matched. The match may still be live or data format changed. Enter manually below.</div>`;
-  } catch(e){ ldr.outerHTML=`<div class="alert a-warn">Error: ${e.message}</div>`; }
+    out.innerHTML=
+      (todayMatches.length?`<div style="font-size:11px;color:var(--gold);font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Today</div>${todayMatches.map(m=>renderMatch(m,'today')).join('')}`:'') +
+      (past.length?`<div style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:1px;margin:12px 0 8px">Recent</div>${past.map(m=>renderMatch(m,'past')).join('')}`:'') +
+      (upcoming.length?`<div style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:1px;margin:12px 0 8px">Upcoming</div>${upcoming.map(m=>renderMatch(m,'upcoming')).join('')}`:'');
+  }catch(e){out.innerHTML=`<div class="alert a-warn">Error: ${e.message}. Try manual entry below.</div>`;}
 }
+
+function selectMatch(t1,t2,fullName,matchId,key){
+  // Set both IPL teams
+  selectedIPLTeams.clear();
+  if(IPL_TEAMS[t1]) selectedIPLTeams.add(t1);
+  if(IPL_TEAMS[t2]) selectedIPLTeams.add(t2);
+  selectedMatchLabel=fullName;
+  // Show score entry section
+  document.getElementById('score-entry-section').style.display='block';
+  document.getElementById('selected-match-banner').textContent='🏏 '+fullName;
+  // Set date and label
+  const di=document.getElementById('e-date');
+  if(di&&!di.value) di.value=new Date().toISOString().split('T')[0];
+  const li=document.getElementById('e-label');
+  if(li) li.value=fullName;
+  // Build the player grid
+  buildEntryGrid();
+  // Scroll to score entry
+  document.getElementById('score-entry-section').scrollIntoView({behavior:'smooth',block:'start'});
+  // Also update manual grid
+  buildIPLTeamGrid();
+}
+
+// Legacy fetchMatches alias
+async function fetchMatches(){ await fetchIPLSchedule(); }
 
 // ═══════════════════════════════════════════
 // AUTH
@@ -899,7 +1028,13 @@ function doLogin(){
     document.getElementById('gate-wrap').style.display = 'none';
     document.getElementById('admin-panel').style.display = 'block';
     if(DB.apiKey) document.getElementById('api-inp').value = DB.apiKey;
-    buildEntryTabs(); buildCapGrid();
+    // Init score entry
+    buildIPLTeamGrid();
+    // Set today's date
+    const di=document.getElementById('e-date');
+    if(di&&!di.value) di.value=new Date().toISOString().split('T')[0];
+    // Build captain grid
+    buildCapGrid();
     document.getElementById('roster-note').textContent = 'Admin — edit enabled';
   } else { document.getElementById('pw-err').style.display='block'; }
 }
