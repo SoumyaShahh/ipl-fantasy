@@ -241,7 +241,11 @@ select.inp option{background:var(--surf)}
     <div class="schedule-card">
       <div class="sec-lbl" style="margin-bottom:12px">Step 1 — Pick a Match</div>
       <div class="row" style="margin-bottom:12px;gap:8px">
-        <input type="date" class="inp" id="e-date" style="width:160px;flex-shrink:0" onchange="renderScheduleForDate()">
+        <div style="display:flex;align-items:center;gap:4px;flex-shrink:0">
+        <button onclick="changeDate(-1)" style="background:var(--card2);border:1px solid var(--border);color:var(--text);width:34px;height:38px;border-radius:8px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center">‹</button>
+        <input type="date" class="inp" id="e-date" style="width:145px" onchange="renderScheduleForDate()">
+        <button onclick="changeDate(1)" style="background:var(--card2);border:1px solid var(--border);color:var(--text);width:34px;height:38px;border-radius:8px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center">›</button>
+      </div>
         <input type="text" class="inp" id="e-label" placeholder="Match label (auto-filled)" style="flex:1">
       </div>
       <div id="match-picker"></div>
@@ -311,7 +315,7 @@ const DEFAULT_TEAMS={
   "Harshil": ["Nitish Rana","Mohammed Shami","Prasidh Krishna","Marco Jansen","Rasikh Salam","Tim Seifert","Liam Livingstone","Tim David","Sai Kishore","Shimron Hetmyer","Donovan Ferreira","Abishek Porel","Sanju Samson"],
   "Dhyan":   ["Ravindra Jadeja","Khaleel Ahmed","Venkatesh Iyer","Dewald Brevis","Harshal Patel","Jos Buttler","Yashasvi Jaiswal","Varun Chakaravarthy","Azmatullah Omarzai","Naman Dhir","Heinrich Klaasen"],
   "Divi":    ["Shubman Gill","Mangesh Yadav","Devdutt Padikkal","Aiden Markram","Kartik Tyagi","Shashank Singh","Ishan Kishan","Vipraj Nigam","Washington Sundar","Ashutosh Sharma","Ryan Rickelton","Lungi Ngidi"],
-  "Aryan":   ["Priyansh Arya","Zeeshan Ansari","Suyash Sharma","Phil Salt","Nehal Wadhera","Jofra Archer","Ayush Badoni","Noor Ahmad","Ben Duckett","Angkrish Raghuvanshi","Mayank Markande"],
+  "Aryan":   ["Priyansh Arya","Zeeshan Ansari","Suyash Sharma","Phil Salt","Nehal Wadhera","Jofra Archer","Ayush Badoni","Noor Ahmad","Pathum Nissanka","Angkrish Raghuvanshi","Mayank Markande"],
   "Vandit":  ["Aniket Verma","Axar Patel","Shimron Hetmyer","Mukesh Kumar","Rishabh Pant","Sai Sudharsan","Glenn Phillips","Arshdeep Singh","Josh Inglis","Mayank Yadav","Blessing Muzarabani","Shivam Dube"],
   "Dhiraj":  ["Hardik Pandya","Rahul Tewatia","Jamie Overton","Jitesh Sharma","Jasprit Bumrah","Matt Henry","Yuzvendra Chahal","Tilak Varma","Vaibhav Suryavanshi","Xavier Bartlett","Brydon Carse"],
   "Vatty":   ["Rajat Patidar","Bhuvneshwar Kumar","Pat Cummins","Will Jacks","Kartik Sharma","Rohit Sharma","Rachin Ravindra","Shreyas Iyer","Jacob Bethell","Cooper Connolly","Digvesh Rathi","Heinrich Klaasen","Yash Thakur","Shivam Mavi","Shahbaz Ahmed"]
@@ -323,17 +327,17 @@ const TN=Object.keys(DEFAULT_TEAMS);
 // IPL 2026 SQUADS (each player mapped to their IPL team)
 // ═══════════════════════════════════════
 const IPL_SQUADS={
-  "CSK": ["Ruturaj Gaikwad","MS Dhoni","Ravindra Jadeja","Shivam Dube","Ayush Mhatre","Rachin Ravindra","Devon Conway","Sam Curran","Khaleel Ahmed","Matheesha Pathirana","Tushar Deshpande","Deepak Chahar","Gurjapneet Singh","Jamie Overton","Noor Ahmad","Nathan Ellis","Vansh Bedi","Anshul Kamboj","Ramakrishna Ghosh","Kamlesh Nagarkoti"],
-  "GT":  ["Shubman Gill","Sai Sudharsan","Rashid Khan","Shahrukh Khan","Rahul Tewatia","Mohammed Siraj","Prasidh Krishna","Washington Sundar","Jos Buttler","Glenn Phillips","Manav Suthar","Noor Ahmad","Jayant Yadav","Sai Kishore","Mahipal Lomror","Arshad Khan","Sherfane Rutherford","Gurnoor Brar","Ravisrinivasan Sai Kishore"],
-  "DC":  ["KL Rahul","Axar Patel","Rishabh Pant","Mitchell Starc","Kuldeep Yadav","Tristan Stubbs","Jake Fraser-McGurk","Faf du Plessis","Mukesh Kumar","Ashutosh Sharma","Donovan Ferreira","Vipraj Nigam","Karun Nair","Darshan Nalkande","Sameer Rizvi","T Natarajan","Mohit Sharma","Abishek Porel","Dushmantha Chameera"],
-  "LSG": ["Rishabh Pant","Nicholas Pooran","Mitchell Marsh","David Miller","Aiden Markram","Avesh Khan","Ravi Bishnoi","Mayank Yadav","Digvesh Rathi","Ayush Badoni","Ayush Badoni","Shahbaz Ahmed","Himmat Singh","M Siddharth","Mohsin Khan","Prince Yadav","Akash Deep","Arshin Kulkarni","Manimaran Siddharth"],
-  "RCB": ["Virat Kohli","Phil Salt","Devdutt Padikkal","Rajat Patidar","Tim David","Liam Livingstone","Jacob Bethell","Josh Inglis","Bhuvneshwar Kumar","Romario Shepherd","Suyash Sharma","Krunal Pandya","Rasikh Salam","Lungi Ngidi","Jitesh Sharma","Abhinandan Singh","Swapnil Singh","Nuwan Thushara","Tim Southee"],
-  "MI":  ["Rohit Sharma","Suryakumar Yadav","Hardik Pandya","Jasprit Bumrah","Tilak Varma","Naman Dhir","Will Jacks","Ryan Rickelton","Trent Boult","Deepak Chahar","Shivam Mavi","Karn Sharma","Reece Topley","Bevon Jacobs","Arjun Tendulkar","Raj Bawa","Ashwani Kumar","Allah Ghazanfar","Vignesh Puthur"],
-  "KKR": ["Rinku Singh","Venkatesh Iyer","Sunil Narine","Andre Russell","Angkrish Raghuvanshi","Ajinkya Rahane","Varun Chakaravarthy","Harshit Rana","Mayank Markande","Moeen Ali","Rovman Powell","Ramandeep Singh","Spencer Johnson","Anrich Nortje","Luvnith Sisodia","Manish Pandey","Suyash Sharma","Umran Malik","Rishi Bharat"],
-  "PBKS":["Priyansh Arya","Prabhsimran Singh","Shashank Singh","Marco Jansen","Kagiso Rabada","Arshdeep Singh","Harpreet Brar","Ravi Bishnoi","Azmatullah Omarzai","Nehal Wadhera","Lockie Ferguson","Shreyas Iyer","Vyshak Vijaykumar","Pyla Avinash","Musheer Khan","Suryansh Shedge","Vishnu Vinod","Harnoor Pannu","Yash Thakur"],
-  "SRH": ["Travis Head","Abhishek Sharma","Nitish Kumar Reddy","Heinrich Klaasen","Ishan Kishan","Harshal Patel","Jaydev Unadkat","Pat Cummins","Brydon Carse","Aniket Verma","Harsh Dubey","Kamindu Mendis","Zeeshan Ansari","Simon Doull","David Payne","Atharva Taide","Sachin Baby","Akash Singh"],
-  "RR":  ["Yashasvi Jaiswal","Riyan Parag","Shimron Hetmyer","Jos Buttler","Yuzvendra Chahal","Jofra Archer","Dhruv Jurel","Sanju Samson","Wanindu Hasaranga","Sandeep Sharma","Kumar Kartikeya","Tushar Deshpande","Donovan Ferreira","Lhuan-dre Pretorius","Kunal Rathore","Shubham Dubey","Yash Dayal","Yudhvir Charak"]
-};
+  "CSK": ["Ruturaj Gaikwad","Ayush Mhatre","Dewald Brevis","Sarfaraz Khan","Shivam Dube","Sanju Samson","MS Dhoni","Kartik Sharma","Rahul Chahar","Matt Henry","Prashant Veer","Akeal Hosein","Khaleel Ahmed","Noor Ahmad","Jamie Overton","Anshul Kamboj","Zak Foulkes","Matthew Short","Aman Khan","Spencer Johnson","Ramakrishna Ghosh","Shreyas Gopal","Gurjapneet Singh","Mukesh Choudhary","Urvil Patel"],
+  "DC":  ["KL Rahul","Ben Duckett","Karun Nair","Nitish Rana","Tristan Stubbs","David Miller","Pathum Nissanka","Ashutosh Sharma","Sameer Rizvi","Prithvi Shaw","Axar Patel","Auqib Dar","Abishek Porel","Vipraj Nigam","Mitchell Starc","Kuldeep Yadav","Mukesh Kumar","T. Natarajan","Dushmantha Chameera","Kyle Jamieson","Lungi Ngidi","Ajay Mandal","Tripurana Vijay","Madhav Tiwari","Sahil Parakh"],
+  "GT":  ["Shubman Gill","Sai Sudharsan","Jos Buttler","Shahrukh Khan","Glenn Phillips","Anuj Rawat","Kumar Kushagra","Washington Sundar","Rahul Tewatia","Jason Holder","Rashid Khan","Kagiso Rabada","Mohammed Siraj","Prasidh Krishna","Sai Kishore","Gurnoor Singh Brar","Manav Suthar","Jayant Yadav","Ashok Sharma","Nishant Sindhu","Arshad Khan","Ishant Sharma","Tom Banton","Luke Wood","Kulwant Khejroliya"],
+  "KKR": ["Ajinkya Rahane","Rinku Singh","Angkrish Raghuvanshi","Manish Pandey","Cameron Green","Finn Allen","Rachin Ravindra","Tim Seifert","Rahul Tripathi","Rovman Powell","Sunil Narine","Ramandeep Singh","Varun Chakaravarthy","Tejasvi Singh","Anukul Roy","Prashant Solanki","Kartik Tyagi","Vaibhav Arora","Blessing Muzarabani","Matheesha Pathirana","Umran Malik","Navdeep Saini","Daksh Kamra","Saurabh Dubey","Sarthak Ranjan"],
+  "LSG": ["Rishabh Pant","Nicholas Pooran","Abdul Samad","Aiden Markram","Mitchell Marsh","Josh Inglis","Matthew Breetzke","Himmat Singh","Akshat Raghuwanshi","Ayush Badoni","Wanindu Hasaranga","Anrich Nortje","Mohammed Shami","Mayank Yadav","Avesh Khan","Mohsin Khan","Arshin Kulkarni","Digvesh Rathi","Shahbaz Ahmed","Arjun Tendulkar","Akash Singh","Prince Yadav","M. Siddharth","Mukul Choudhary","Naman Tiwari"],
+  "MI":  ["Rohit Sharma","Suryakumar Yadav","Tilak Varma","Hardik Pandya","Quinton de Kock","Ryan Rickelton","Sherfane Rutherford","Robin Minz","Will Jacks","Naman Dhir","Mitchell Santner","Corbin Bosch","Jasprit Bumrah","Trent Boult","Deepak Chahar","Allah Ghazanfar","Mayank Markande","Shardul Thakur","Raj Bawa","Ashwani Kumar","Raghu Sharma","Atharva Ankolekar","Mohammad Izhar","Danish Malewar","Mayank Rawat"],
+  "PBKS":["Shreyas Iyer","Prabhsimran Singh","Nehal Wadhera","Shashank Singh","Marcus Stoinis","Musheer Khan","Priyansh Arya","Vishnu Vinod","Harnoor Pannu","Pyla Avinash","Suryansh Shedge","Cooper Connolly","Azmatullah Omarzai","Harpreet Brar","Marco Jansen","Mitch Owen","Arshdeep Singh","Yuzvendra Chahal","Xavier Bartlett","Lockie Ferguson","Vyshak Vijaykumar","Yash Thakur","Ben Dwarshuis","Vishal Nishad","Pravin Dubey"],
+  "RR":  ["Yashasvi Jaiswal","Vaibhav Suryavanshi","Riyan Parag","Shimron Hetmyer","Dhruv Jurel","Donovan Ferreira","Shubham Dubey","Lhuan-dre Pretorius","Ravindra Jadeja","Dasun Shanaka","Jofra Archer","Ravi Bishnoi","Yudhvir Singh Charak","Tushar Deshpande","Sandeep Sharma","Kwena Maphaka","Nandre Burger","Sushant Mishra","Vignesh Puthur","Yash Raj Punja","Ravi Singh","Brijesh Sharma","Aman Rao","Adam Milne","Kuldeep Sen"],
+  "RCB": ["Virat Kohli","Rajat Patidar","Devdutt Padikkal","Phil Salt","Tim David","Jacob Bethell","Jitesh Sharma","Venkatesh Iyer","Krunal Pandya","Romario Shepherd","Mangesh Yadav","Josh Hazlewood","Jacob Duffy","Bhuvneshwar Kumar","Rasikh Salam","Suyash Sharma","Yash Dayal","Nuwan Thushara","Abhinandan Singh","Swapnil Singh","Jordan Cox","Satvik Deswal","Kanishk Chouhan","Vihaan Malhotra","Vicky Ostwal"],
+  "SRH": ["Travis Head","Abhishek Sharma","Ishan Kishan","Heinrich Klaasen","Nitish Kumar Reddy","Aniket Verma","Liam Livingstone","Kamindu Mendis","Harshal Patel","Pat Cummins","Brydon Carse","Zeeshan Ansari","Jaydev Unadkat","Shivam Mavi","David Payne","Eshan Malinga","Harsh Dubey","R Smaran","Shivang Kumar","Salil Arora","Krains Fuletra","Praful Hinge","Amit Kumar","Onkar Tarmale","Sakib Hussain"]
+}
 
 // ═══════════════════════════════════════
 // IPL 2026 FULL SCHEDULE
@@ -650,6 +654,14 @@ async function delDay(date){
 // ═══════════════════════════════════════
 // SCHEDULE & SCORE ENTRY
 // ═══════════════════════════════════════
+function changeDate(dir){
+  const di=document.getElementById('e-date');
+  if(!di.value) di.value=new Date().toISOString().split('T')[0];
+  const d=new Date(di.value+'T12:00:00');
+  d.setDate(d.getDate()+dir);
+  di.value=d.toISOString().split('T')[0];
+  renderScheduleForDate();
+}
 function renderScheduleForDate(){
   const date=document.getElementById('e-date').value;
   if(!date){document.getElementById('match-picker').innerHTML='';return;}
@@ -723,11 +735,14 @@ function buildMatchGrid(team1,team2){
   // Find fantasy players in each team
   const getPlayers=(squad,iplCode)=>{
     const res=[];
-    TN.forEach(ft=>{
-      TEAMS[ft].forEach(p=>{
-        if(squad.includes(p.toLowerCase())&&!res.find(x=>x.player===p)){
-          res.push({player:p,fantasyTeam:ft});
-        }
+    // squad is already in batting order - iterate squad order, find matching fantasy players
+    squad.forEach(squadPlayer=>{
+      TN.forEach(ft=>{
+        TEAMS[ft].forEach(p=>{
+          if(p.toLowerCase()===squadPlayer.toLowerCase()&&!res.find(x=>x.player===p)){
+            res.push({player:p,fantasyTeam:ft});
+          }
+        });
       });
     });
     return res;
