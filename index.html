@@ -462,8 +462,8 @@ function calcRaw(r,w){return(parseInt(r)||0)+(parseInt(w)||0)*20;}
 function calcPts(player,team,r,w){
   const raw=calcRaw(r,w);
   const c=DB.caps[team]?.c,vc=DB.caps[team]?.vc;
-  if(c&&player===c)return Math.round(raw*2);
-  if(vc&&player===vc)return Math.round(raw*1.5);
+  if(c&&player===c)return raw*2;
+  if(vc&&player===vc)return raw*1.5;
   return raw;
 }
 function getTeamTotals(){
@@ -718,6 +718,12 @@ function selectMatch(matchNo){
   const label=`${IPL_FULL[m.home]||m.home} vs ${IPL_FULL[m.away]||m.away}`;
   document.getElementById('e-label').value=label;
   document.getElementById('e-date').value=m.date;
+  // Pre-load any existing scores for this date into pendingScores
+  pendingScores={};
+  const existing=DB.history.find(d=>d.date===m.date);
+  if(existing&&existing.scores){
+    Object.assign(pendingScores,existing.scores);
+  }
   // Show entry section
   document.getElementById('score-entry-wrap').style.display='block';
   document.getElementById('selected-banner').textContent='🏏 '+label+' (Match '+m.no+')';
@@ -800,8 +806,18 @@ async function saveEntry(){
   const ss=document.getElementById('save-status');
   ss.innerHTML='<div class="alert a-info"><span class="spin"></span>Saving to cloud...</div>';
   const ex=DB.history.findIndex(d=>d.date===date);
-  if(ex>=0)DB.history[ex].scores={...DB.history[ex].scores,...pendingScores};
-  else DB.history.push({date,label,scores:{...pendingScores}});
+  // Always MERGE with existing scores - never overwrite
+  if(ex>=0){
+    const existing=DB.history[ex].scores||{};
+    // For each pending score, update or add - never delete others
+    Object.entries(pendingScores).forEach(([p,s])=>{
+      existing[p]=s;
+    });
+    DB.history[ex].scores=existing;
+    DB.history[ex].label=label;
+  } else {
+    DB.history.push({date,label,scores:{...pendingScores}});
+  }
   DB.history.sort((a,b)=>a.date.localeCompare(b.date));
   const ok=await cloudWrite();
   if(ok){
