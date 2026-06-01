@@ -541,25 +541,21 @@ function getPlayerTotals(){
 function renderStandings(){
   const tt=getTeamTotals();
   const allPT=getPlayerTotals();
+  const topP=Object.entries(allPT).sort((a,b)=>b[1].pts-a[1].pts)[0];
+  let hotTeam=TN[0],hotPts=0;
+  TN.forEach(t=>{const dp=tt[t].daily[tt[t].daily.length-1]||0;if(dp>hotPts){hotPts=dp;hotTeam=t;}});
 
-  // In Best XI mode, override team totals with top-11-only totals
+  // In Best XI mode, recalculate each team's pts using only top 11 scorers
   if(scoringMode==='xi'){
     TN.forEach(t=>{
-      const players=TEAMS[t];
-      const playerPts=players.map(p=>({name:p,pts:allPT[p]?.pts||0}));
-      playerPts.sort((a,b)=>b.pts-a.pts);
-      const top11=playerPts.slice(0,11);
-      tt[t].pts=top11.reduce((s,p)=>s+p.pts,0);
+      const playerPts=TEAMS[t].map(p=>allPT[p]?.pts||0);
+      playerPts.sort((a,b)=>b-a);
+      tt[t].pts=playerPts.slice(0,11).reduce((s,p)=>s+p,0);
     });
   }
 
   const sorted=TN.slice().sort((a,b)=>tt[b].pts-tt[a].pts);
   const maxPts=tt[sorted[0]].pts||1;
-  const allPT=getPlayerTotals();
-  const topP=Object.entries(allPT).sort((a,b)=>b[1].pts-a[1].pts)[0];
-  let hotTeam=sorted[0],hotPts=0;
-  TN.forEach(t=>{const dp=tt[t].daily[tt[t].daily.length-1]||0;if(dp>hotPts){hotPts=dp;hotTeam=t;}});
-
   const medals=['🥇','🥈','🥉'];
   const topCls=['top1','top2','top3'];
   const rankCls=['r1','r2','r3'];
@@ -571,6 +567,7 @@ function renderStandings(){
       <div class="stat-box"><div class="stat-lbl">⚡ Top Player</div><div class="stat-val" style="font-size:.85rem;padding-top:5px;line-height:1.3">${topP?topP[0]:'—'}</div><div class="stat-sub">${topP?topP[1].pts+' pts':'no data'}</div></div>
       <div class="stat-box"><div class="stat-lbl">🔥 Today</div><div class="stat-val" style="font-size:1rem;padding-top:5px">${hotTeam||'—'}</div><div class="stat-sub">${hotPts?'+'+hotPts+' pts':'no match yet'}</div></div>
     </div>
+    ${scoringMode==='xi'?'<div class="alert a-info" style="font-size:12px;margin-bottom:10px">⭐ Best XI mode — only top 11 scorers per team counted</div>':''}
     <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Standings · tap any team for full breakdown</div>
     <div class="lb-list">`+
     sorted.map((t,i)=>{
@@ -594,7 +591,7 @@ function renderStandings(){
         </div>
         <div class="lb-pts">
           <div class="lb-pts-num">${pts}</div>
-          <div class="lb-pts-lbl">total pts</div>
+          <div class="lb-pts-lbl">${scoringMode==='xi'?'best xi':'total pts'}</div>
           <div class="lb-today${todayPts>0?'':' zero'}">${todayPts>0?'+'+todayPts+' today':'—'}</div>
         </div>
       </div>`;
