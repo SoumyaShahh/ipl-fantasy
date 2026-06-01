@@ -155,6 +155,12 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
 .modal-player-bar{height:3px;border-radius:2px;background:var(--gold);opacity:.35;margin-top:4px;transition:width .3s}
 select.inp option{background:var(--surf)}
 .filter-row{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+
+/* MODE BUTTONS */
+.mode-btn{background:var(--card);border:1px solid var(--border);color:var(--muted);padding:8px 16px;border-radius:20px;cursor:pointer;font-family:'Inter',sans-serif;font-size:13px;font-weight:500;transition:all .2s}
+.mode-btn.active{background:var(--gold);border-color:var(--gold);color:#000;font-weight:600}
+.mode-btn:hover:not(.active){border-color:var(--gold);color:var(--gold)}
+.best-xi-badge{font-size:10px;background:rgba(240,180,41,.2);color:var(--gold);padding:2px 7px;border-radius:8px;margin-left:6px;font-weight:600}
 </style>
 </head>
 <body>
@@ -194,6 +200,13 @@ select.inp option{background:var(--surf)}
 
 <!-- STANDINGS -->
 <div class="page active" id="page-standings">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+    <div style="display:flex;gap:8px;align-items:center">
+      <button id="mode-all" class="mode-btn active" onclick="setMode('all')">All Players</button>
+      <button id="mode-xi" class="mode-btn" onclick="setMode('xi')">⭐ Best XI</button>
+    </div>
+    <div style="font-size:11px;color:var(--muted)" id="mode-desc">Counting all players</div>
+  </div>
   <div id="standings-content"><div class="loading-wrap"><div class="big-spin"></div><p>Loading from cloud...</p></div></div>
 </div>
 
@@ -416,7 +429,7 @@ const IPL_SCHEDULE=[
   {no:71,date:"2026-05-26",home:"RCB",away:"GT",venue:"Dharamshala",label:"Qualifier 1"},
   {no:72,date:"2026-05-27",home:"SRH",away:"RR",venue:"New Chandigarh",label:"Eliminator"},
   {no:73,date:"2026-05-29",home:"GT",away:"RR",venue:"New Chandigarh",label:"Qualifier 2"},
-  {no:74,date:"2026-05-31",home:"RCB",away:"RR",venue:"Ahmedabad",label:"Final"}
+  {no:74,date:"2026-05-31",home:"RCB",away:"GT",venue:"Ahmedabad",label:"Final"}
 ];
 
 // Full team names
@@ -428,6 +441,30 @@ const IPL_FULL={"RCB":"Royal Challengers Bengaluru","MI":"Mumbai Indians","CSK":
 let isAdmin=false, pendingScores={}, selectedMatch=null;
 let DB=(()=>{try{const r=localStorage.getItem('ipl_f26_v2');return r?JSON.parse(r):{history:[],apiKey:'',caps:{},teams:null};}catch(e){return{history:[],apiKey:'',caps:{},teams:null};}})();
 function saveLocalDB(){localStorage.setItem('ipl_f26_v2',JSON.stringify(DB));}
+
+// ═══════════════════════════════════════
+// SCORING MODE
+// ═══════════════════════════════════════
+let scoringMode = 'all'; // 'all' or 'xi'
+
+function setMode(mode){
+  scoringMode = mode;
+  document.getElementById('mode-all').classList.toggle('active', mode==='all');
+  document.getElementById('mode-xi').classList.toggle('active', mode==='xi');
+  document.getElementById('mode-desc').textContent = mode==='all'
+    ? 'Counting all players'
+    : 'Only top 11 scorers per team counted';
+  renderStandings();
+}
+
+// Get total points for a team - optionally only top 11 players
+function getTeamTotalBestXI(team, allPlayerTotals){
+  const players = TEAMS[team];
+  const pts = players.map(p => allPlayerTotals[p]?.pts || 0);
+  pts.sort((a,b) => b-a);
+  // Take top 11
+  return pts.slice(0,11).reduce((s,p) => s+p, 0);
+}
 
 // ═══════════════════════════════════════
 // CLOUD
@@ -503,6 +540,19 @@ function getPlayerTotals(){
 // ═══════════════════════════════════════
 function renderStandings(){
   const tt=getTeamTotals();
+  const allPT=getPlayerTotals();
+
+  // In Best XI mode, override team totals with top-11-only totals
+  if(scoringMode==='xi'){
+    TN.forEach(t=>{
+      const players=TEAMS[t];
+      const playerPts=players.map(p=>({name:p,pts:allPT[p]?.pts||0}));
+      playerPts.sort((a,b)=>b.pts-a.pts);
+      const top11=playerPts.slice(0,11);
+      tt[t].pts=top11.reduce((s,p)=>s+p.pts,0);
+    });
+  }
+
   const sorted=TN.slice().sort((a,b)=>tt[b].pts-tt[a].pts);
   const maxPts=tt[sorted[0]].pts||1;
   const allPT=getPlayerTotals();
@@ -561,21 +611,31 @@ function openModal(team){
   const players=TEAMS[team].map(p=>({name:p,...(allPT[p]||{runs:0,wkts:0,pts:0,matches:0})})).sort((a,b)=>b.pts-a.pts);
   const maxP=players[0]?.pts||1;
   const best=tt[team].daily.length?Math.max(...tt[team].daily):0;
-  document.getElementById('modal-title').textContent=`${team} · ${tt[team].pts} pts`;
+  // Calculate Best XI for this team
+  const allPlayersForTeam = TEAMS[team].map(p=>({name:p,pts:allPT[p]?.pts||0}));
+  allPlayersForTeam.sort((a,b)=>b.pts-a.pts);
+  const top11names = new Set(allPlayersForTeam.slice(0,11).map(p=>p.name));
+  const displayPts = scoringMode==='xi' ? allPlayersForTeam.slice(0,11).reduce((s,p)=>s+p.pts,0) : tt[team].pts;
+
+  document.getElementById('modal-title').textContent=`${team} · ${displayPts} pts${scoringMode==='xi'?' (Best XI)':''}`;
   document.getElementById('modal-body').innerHTML=
     `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px">
-      <div class="stat-box"><div class="stat-lbl">Total Pts</div><div class="stat-val">${tt[team].pts}</div></div>
+      <div class="stat-box"><div class="stat-lbl">${scoringMode==='xi'?'Best XI Pts':'Total Pts'}</div><div class="stat-val">${displayPts}</div></div>
       <div class="stat-box"><div class="stat-lbl">Best Day</div><div class="stat-val">${best}</div></div>
       <div class="stat-box"><div class="stat-lbl">Match Days</div><div class="stat-val">${DB.history.length}</div></div>
     </div>
+    ${scoringMode==='xi'?'<div class="alert a-info" style="font-size:12px;margin-bottom:10px">⭐ Showing Best XI — top 11 scorers highlighted</div>':''}
     <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Player Breakdown</div>`+
     players.map(p=>{
       const iC=c&&p.name===c,iVC=vc&&p.name===vc;
       const badge=iC?'<span class="pe-badge pe-c">C</span>':iVC?'<span class="pe-badge pe-vc">VC</span>':'';
       const pct=Math.max(Math.round((p.pts/maxP)*100),2);
-      return`<div class="modal-player-row">
+      const inXI = top11names.has(p.name);
+      const xiTag = scoringMode==='xi'&&inXI?'<span class="best-xi-badge">XI</span>':'';
+      const dimmed = scoringMode==='xi'&&!inXI?'opacity:.4':'';
+      return`<div class="modal-player-row" style="${dimmed}">
         <div style="flex:1;min-width:0">
-          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">${badge}<span style="font-weight:500">${p.name}</span></div>
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">${badge}${xiTag}<span style="font-weight:500">${p.name}</span></div>
           <div class="modal-player-bar" style="width:${pct}%"></div>
         </div>
         <div style="text-align:right;flex-shrink:0;margin-left:12px">
